@@ -6,4 +6,4 @@ struct pop_entry {
 
 struct pop_entry * make_entry(int y, int p, char c[]);
 
-struct pop_entry ** read_csv();
+void read_csv();
