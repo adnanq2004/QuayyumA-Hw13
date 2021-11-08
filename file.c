@@ -19,8 +19,11 @@ struct pop_entry * make_entry(int y, int p, char c[15]) {
 void read_csv() {
 
 	int filetoread = open("nyc_pop.csv", O_RDONLY);
-	char * unfun = malloc(950);
-	read(filetoread, unfun, 950);
+	struct stat * s = malloc(sizeof(struct stat));
+	stat("nyc_pop.csv", s);
+	char * unfun = malloc(s->st_size);
+	read(filetoread, unfun, s->st_size);
+	printf("reading nyc_pop.csv\n");
 	char nums[24][6][15];
 	int filetoreadtwo = open("nyc_pop.csv", O_RDONLY);
 	int i = 0;
@@ -31,18 +34,18 @@ void read_csv() {
 		read(filetoreadtwo, tempc, 1);
 		if (tempc[0] != ',' && tempc[0] != '\n') {
 			// printf("%d\n", 6);
-			strcat(temps, tempc);
+			strncat(temps, tempc, 1);
 		}
 		if (tempc[0] == ',') {
 			// printf("%d\n", 5);
-			strcpy(&nums[i][j][0], temps);
+			strncpy(&nums[i][j][0], temps, 15);
 			j++;
 			// printf("%s.\n", temps);
 			temps[0] = '\0';
 		}
 		if (tempc[0] == '\n') {
 			// printf("%d\n", 7);
-			strcpy(&nums[i][j][0], temps);
+			strncpy(&nums[i][j][0], temps, 15);
 			i++;
 			j = 0;
 			// printf("%s.\n", temps);
@@ -66,7 +69,7 @@ void read_csv() {
 	char boron[5][15];
 	char * space = malloc(1);
 	space[0] = '\n';
-	struct pop_entry * new_entry;
+	// struct pop_entry * new_entry;
 	for (i = 0; i < 5; i++) {
 		strcpy(boron[i], nums[0][i+1]);
 	}
@@ -74,13 +77,20 @@ void read_csv() {
 		yearn = atoi(nums[i][0]);
 		for (j = 1; j < 6; j++) {
 			popn = atoi(nums[i][j]);
-			new_entry = make_entry(yearn, popn, boron[j-1]);
-			write(filetomake, &(new_entry->year), 4);
-			write(filetomake, &(new_entry->population), 4);
-			write(filetomake, &(new_entry->boro), 15);
-			write(filetomake, space, 1);
+			// new_entry = make_entry(yearn, popn, boron[j-1]);
+			struct pop_entry new_entry;
+			new_entry.year = yearn;
+			new_entry.population = popn;
+			strncpy(new_entry.boro, boron[j-1], 15);
+			// write(filetomake, &(new_entry->year), 4);
+			// write(filetomake, &(new_entry->population), 4);
+			// write(filetomake, &(new_entry->boro), 15);
+			// write(filetomake, space, 1);
+			write(filetomake, &new_entry, sizeof(struct pop_entry));
 		}
 	}
+
+	printf("wrote %ld bytes\n", s->st_size);
 
 	// int tempfile = open("newfile.csv", O_RDONLY);
 	// char * s = malloc(5);
@@ -89,21 +99,26 @@ void read_csv() {
 
 void read_data() {
 
-	int file = open("newfile.csv", O_RDONLY);
-	struct stat * s;
+	int file = open("newfile.csv", O_RDONLY, 0);
+	struct stat * s = malloc(sizeof(struct stat));
 	stat("newfile.csv", s);
-	int size = (s->st_size)/23;
-	struct pop_entry * retarr[size];
-	int yearn;
-	int popn;
-	char * boron = malloc(15);
-	// while()
+	int size = (s->st_size)/sizeof(struct pop_entry);
+	// size = size -1;
+	struct pop_entry retarr[size];
+	read(file, retarr, s->st_size);
+	printf("%d\n", 5);
+	int i = 0;
+	while (i < size-5) {
+		printf("%d: year: %d	boro: %s	pop: %d\n\n", i, retarr[i].year, retarr[i].boro, retarr[i].population);
+		i++;
+	}
 
 }
 
 int main(int argc, char *argv[]) {
 
 	read_csv();
+	read_data();
 	return 0;
 
 }
