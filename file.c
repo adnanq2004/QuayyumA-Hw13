@@ -23,7 +23,9 @@ void read_csv() {
 	stat("nyc_pop.csv", s);
 	char * unfun = malloc(s->st_size);
 	read(filetoread, unfun, s->st_size);
+
 	printf("reading nyc_pop.csv\n");
+
 	char nums[24][6][15];
 	int filetoreadtwo = open("nyc_pop.csv", O_RDONLY);
 	int i = 0;
@@ -95,6 +97,10 @@ void read_csv() {
 	// int tempfile = open("newfile.csv", O_RDONLY);
 	// char * s = malloc(5);
 
+	close(filetoread);
+	close(filetoreadtwo);
+	close(filetomake);
+
 }
 
 void read_data() {
@@ -106,18 +112,52 @@ void read_data() {
 	// size = size -1;
 	struct pop_entry retarr[size];
 	read(file, retarr, s->st_size);
-	printf("%d\n", 5);
+	// printf("%d\n", 5);
 	int i = 0;
 	while (i < size-5) {
-		printf("%d: year: %d	boro: %s	pop: %d\n\n", i, retarr[i].year, retarr[i].boro, retarr[i].population);
+		printf("%d: 	year: 	%d	boro: %s		pop: 	%d\n", i, retarr[i].year, retarr[i].boro, retarr[i].population);
 		i++;
 	}
+	printf("\n");
+	close(file);
+
+}
+
+void add_data() {
+
+	int * yeartoadd = malloc(4);
+	int * poptoadd = malloc(4);
+	char * borotoadd = malloc(15);
+	char data[256];
+	printf("please give a valid year:\n");
+	read(STDIN_FILENO, &data, sizeof(data));
+	sscanf(data, "%d\n", yeartoadd);
+	printf("please give a valid population:\n");
+	read(STDIN_FILENO, &data, sizeof(data));
+	sscanf(data, "%d\n", poptoadd);
+	printf("please give a valid borough:\n");
+	read(STDIN_FILENO, &data, sizeof(data));
+	sscanf(data, "%s\n\n", borotoadd);
+	struct pop_entry temp;
+	temp.year = *yeartoadd;
+	temp.population = *poptoadd;
+	strncpy(temp.boro, borotoadd, 15);
+	int file = open("newfile.csv", O_WRONLY | O_APPEND | O_CREAT);
+	void * ptr;
+	struct stat * s;
+	stat("newfile.csv", s);
+	// read(file, ptr, s->st_size-1);
+	write(file, &temp, sizeof(struct pop_entry));
+	printf("appended to file: \nyear: 	%d	boro: %s		pop: 	%d\n\n", temp.year, temp.boro, temp.population);
+	close(file);
 
 }
 
 int main(int argc, char *argv[]) {
 
 	read_csv();
+	read_data();
+	add_data();
 	read_data();
 	return 0;
 
