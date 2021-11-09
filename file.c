@@ -198,6 +198,27 @@ void update_data() {
 
 int main(int argc, char *argv[]) {
 
+	char arr[100];
+	strcpy(arr, argv[1]);
+
+	if (argv[1]) {
+		if (!strcmp(arr, "-read_csv")) {
+			read_csv();
+		}
+		else if (!strcmp(arr, "-read_data")) {
+			read_data();
+		}
+		else if (!strcmp(arr, "-add_data")) {
+			add_data();
+		}
+		else if (!strcmp(arr, "-update_data")) {
+			update_data();
+		}
+		else {
+			printf("%s is not an appropriate method\n", argv[1]);
+		}
+	}
+	
 	// read_csv();
 	// read_data();
 	// add_data();
